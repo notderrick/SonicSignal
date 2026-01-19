@@ -1,0 +1,22 @@
+# Phase 0 Validation Dependencies
+
+# HTTP client for API calls
+httpx>=0.27.0
+
+# Fuzzy string matching for deduplication
+rapidfuzz>=3.6.0
+
+# Spotify API wrapper
+spotipy>=2.24.0
+
+# Data manipulation and CSV export
+pandas>=2.2.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Date/time utilities
+python-dateutil>=2.8.2
+
+# Progress bars for long-running operations
+tqdm>=4.66.0

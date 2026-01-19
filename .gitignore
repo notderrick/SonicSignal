@@ -69,3 +69,7 @@ logs/
 
 # Local Firestore data
 firestore_data/
+
+# Validation phase sample data
+validation/sample_data/*.json
+validation/sample_data/*.csv
