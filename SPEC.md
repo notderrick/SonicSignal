@@ -158,29 +158,50 @@ Every Monday at 8 AM EST, Cloud Scheduler triggers the playlist function:
 
 ## 5. Execution Roadmap
 
-### Phase 1: GCP Foundation & Data Pipeline (Week 1-2)
+### Phase 0: Validation Sprint (Week 1)
+
+**Goal:** Validate the data pipeline approach with real API data before building infrastructure
+
+1. **API Exploration Script:** Simple Python script to fetch 1 week of NYC events from all 3 sources
+2. **Deduplication Proof-of-Concept:** Test RapidFuzz matching thresholds with real data, export to CSV for manual review
+3. **Spotify Match Rate Test:** Attempt to match 50-100 artists, measure success rate and identify edge cases
+4. **Venue Capacity Analysis:** Assess how much data is missing, create manual seed list for key NYC venues
+
+**Success Criteria:**
+- Successfully fetch events from all 3 APIs
+- Deduplication achieves >90% accuracy on manual review
+- Spotify match rate >70%
+- Decision: Proceed to Phase 1 or adjust strategy
+
+**Deliverable:** Validation report with sample data and recommendations
+
+### Phase 1: Data Pipeline Foundation (Week 2-3)
 
 1. **GCP Project Setup:** Create project, enable APIs (Firestore, Cloud Functions, Cloud Run, Secret Manager)
-2. **Firestore Schema:** Design and implement collections for events, artists, venues
+2. **Firestore Schema:** Implement collections for events, artists, venues with proper indexes
 3. **Harvester Functions:** Deploy Cloud Functions to fetch from Ticketmaster, SeatGeek, Songkick
-4. **Deduplication Logic:** Implement RapidFuzz matching and store unified events
+4. **Deduplication Logic:** Implement RapidFuzz matching and merge into unified events
+5. **Weekly Scheduling:** Cloud Scheduler job to trigger harvester every Sunday at 3 AM EST
 
-**Deliverable:** Firestore populated with deduplicated events from all sources
+**Deliverable:** Firestore populated with deduplicated events, running on weekly schedule
 
-### Phase 2: Spotify Integration & Scoring (Week 3-4)
+### Phase 2: Enrichment & Scoring (Week 3-4)
 
-1. **Spotify OAuth:** Implement auth flow, store tokens securely in Secret Manager
+1. **Spotify OAuth:** Implement auth flow, store refresh token in Secret Manager
 2. **Artist Enrichment:** Cloud Function to match artists to Spotify IDs, fetch popularity/genres
-3. **Curation Engine:** Implement scoring algorithm, store scores in Firestore
+3. **Unmatched Artist Handling:** Store artists without Spotify profiles with `spotify_matched: false` flag
+4. **Curation Engine:** Calculate scores for matched artists only
+5. **Manual Review Tools:** Simple admin endpoint to view unmatched artists and low-confidence duplicates
 
-**Deliverable:** Enriched events with Curation Scores and Spotify metadata
+**Deliverable:** Enriched events with Curation Scores and Spotify metadata where available
 
 ### Phase 3: Web Application (Week 5-6)
 
-1. **FastAPI Backend:** REST API for events, filtering, user preferences
+1. **FastAPI Backend:** REST API for events, filtering (capacity, genre, date range)
 2. **React Frontend:** Dark-mode UI with filtering sidebar, event cards, genre clouds
-3. **Cloud Run Deploy:** Containerize and deploy with custom domain
-4. **Playlist Automation:** Cloud Scheduler job for Monday morning refresh
+3. **Single User Profile:** Store default user preferences in Firestore (no auth required initially)
+4. **Cloud Run Deploy:** Containerize and deploy with HTTPS
+5. **Playlist Automation:** Cloud Scheduler job for Monday 8 AM playlist refresh (Spotify-matched artists only)
 
 **Deliverable:** Production-ready web app with automated playlist updates
 
@@ -190,6 +211,12 @@ Every Monday at 8 AM EST, Cloud Scheduler triggers the playlist function:
 
 ```
 sonic-signal/
+├── validation/              # Phase 0 exploration scripts
+│   ├── explore_apis.py      # Test API connections
+│   ├── test_dedup.py        # Deduplication POC
+│   ├── test_spotify.py      # Spotify matching test
+│   ├── sample_data/         # CSV exports for manual review
+│   └── requirements.txt
 ├── functions/
 │   ├── harvester/           # API scraper functions
 │   │   ├── main.py
@@ -269,12 +296,22 @@ artists/{artist_id}
   "name": "Artist Name",
   "normalized_name": "artist name",
   "spotify_id": "spotify:artist:xxx",
+  "spotify_matched": true,
   "popularity": 45,
   "genres": ["indie rock", "alternative"],
   "top_tracks": ["track_id_1", "track_id_2", "track_id_3"],
   "image_url": "https://..."
 }
 ```
+
+**Note:** Artists without Spotify profiles will have:
+- `spotify_matched: false`
+- `spotify_id: null`
+- `popularity: 0`
+- `genres: []`
+- `top_tracks: []`
+
+These artists will appear in the UI but be excluded from playlist generation.
 
 ### 7.3 Venues Collection
 
@@ -342,8 +379,10 @@ venues/{venue_id}
 
 | Job Name | Schedule | Target |
 |----------|----------|--------|
-| `daily-harvest` | `0 3 * * *` (3 AM EST) | harvester-function |
-| `monday-playlist` | `0 8 * * 1` (Mon 8 AM) | playlister-function |
+| `weekly-harvest` | `0 3 * * 0` (Sun 3 AM EST) | harvester-function |
+| `monday-playlist` | `0 8 * * 1` (Mon 8 AM EST) | playlister-function |
+
+**Note:** Weekly harvesting reduces API costs and rate limit pressure. Can be increased to daily once data freshness requirements are validated.
 
 ---
 
