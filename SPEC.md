@@ -121,9 +121,75 @@ Cloud Functions that process and transform raw data:
 
 ---
 
-## 4. Core Features
+## 4. Design System: Swiss Indie
 
-### 4.1 The Curation Score Formula
+SonicSignal follows a **Swiss Indie** visual philosophy: high-impact typography, oversized margins, and an asymmetrical "Zine" layout inspired by archival print design.
+
+### 4.1 Visual Principles
+
+- **No rounded corners** — Sharp, editorial aesthetic
+- **No drop shadows** — Flat, print-inspired hierarchy
+- **High contrast** — Black ink on off-white paper
+- **Monospaced data** — Curation scores feel like archival stamps
+- **Hover transitions** — Grayscale to color for artist images
+
+### 4.2 Design Tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| **Base Surface** | `#F9F9F7` (Off-white paper) | Page background |
+| **Primary Text** | `#1A1A1A` (Ink black) | Body text, headings |
+| **Accent** | `#2D5A27` (Signal Green) | CTAs, active states |
+| **Font: Headings** | Playfair Display (Serif) | Event titles, artist names |
+| **Font: Body** | Inter (Sans-serif) | Descriptions, filters |
+| **Font: Data** | JetBrains Mono (Monospace) | Curation scores, dates |
+
+### 4.3 Component Design Language
+
+#### Event List Layout
+- Clean horizontal rows separated by 1px black lines
+- Artist images in grayscale by default
+- Hover state: Images transition to color, subtle background shift to light gray
+
+#### The "Signal Stamp"
+- Curation Score displayed as a small, monospaced archival stamp in the top-right of each entry
+- Format: `SCORE: 0.42` in JetBrains Mono
+
+#### Filter Sidebar
+- Asymmetrical layout with oversized margins
+- Genre tags as solid black text pills (no backgrounds)
+- Capacity toggles as simple checkboxes with labels
+
+### 4.4 Tailwind Configuration
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        paper: '#F9F9F7',
+        ink: '#1A1A1A',
+        signal: '#2D5A27',
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
+      },
+      borderRadius: {
+        none: '0', // Enforce no rounded corners
+      },
+    },
+  },
+}
+```
+
+---
+
+## 5. Core Features
+
+### 5.1 The Curation Score Formula
 
 To help users find "Local/Smaller" acts, the app calculates a score for every show:
 
@@ -137,7 +203,7 @@ Score = (100 ÷ Artist Popularity) × (1000 ÷ Venue Capacity)
 | **Sweet Spot** | 0.5 - 5.0 | Balanced shows at mid-sized venues |
 | **Blockbuster** | > 5.0 | Major stadium events |
 
-### 4.2 Smart Filtering Sidebar
+### 5.2 Smart Filtering Sidebar
 
 Users can filter events by:
 
@@ -145,7 +211,7 @@ Users can filter events by:
 - **Date Range:** "Tonight," "This Weekend," "Next 7 Days"
 - **Genre Clouds:** Dynamic tags from Spotify (e.g., "Indie Rock," "Techno," "Jazz")
 
-### 4.3 The Monday Morning Briefing
+### 5.3 The Monday Morning Briefing
 
 Every Monday at 8 AM EST, Cloud Scheduler triggers the playlist function:
 
@@ -156,7 +222,7 @@ Every Monday at 8 AM EST, Cloud Scheduler triggers the playlist function:
 
 ---
 
-## 5. Execution Roadmap
+## 6. Execution Roadmap
 
 ### Phase 0: Validation Sprint (Week 1)
 
@@ -207,7 +273,7 @@ Every Monday at 8 AM EST, Cloud Scheduler triggers the playlist function:
 
 ---
 
-## 6. Project Structure
+## 7. Project Structure
 
 ```
 sonic-signal/
@@ -269,7 +335,7 @@ sonic-signal/
 
 ---
 
-## 7. Data Models (Firestore)
+## 8. Data Models (Firestore)
 
 ### 7.1 Events Collection
 
@@ -330,7 +396,7 @@ venues/{venue_id}
 
 ---
 
-## 8. API Integration Details
+## 9. API Integration Details
 
 ### 8.1 Ticketmaster Discovery API
 
@@ -361,7 +427,7 @@ venues/{venue_id}
 
 ---
 
-## 9. GCP Configuration
+## 10. GCP Configuration
 
 ### Secret Manager Secrets
 
@@ -386,7 +452,7 @@ venues/{venue_id}
 
 ---
 
-## 10. Known Challenges & Mitigations
+## 11. Known Challenges & Mitigations
 
 | Challenge | Mitigation |
 |-----------|------------|
@@ -399,7 +465,7 @@ venues/{venue_id}
 
 ---
 
-## 11. Success Metrics
+## 12. Success Metrics
 
 | Metric | Target | Measurement |
 |--------|--------|-------------|

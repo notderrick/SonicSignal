@@ -10,7 +10,7 @@ SonicSignal aggregates concerts from across NYC, surfaces hidden gems using a pr
 - 💎 **Curation Score** — Surfaces rising artists in intimate venues before they blow up
 - 🎧 **Monday Morning Briefing** — Auto-generated Spotify playlist of upcoming shows, refreshed weekly
 - 🔍 **Smart Filters** — Filter by venue size, date range, and genre
-- 🌙 **Dark Mode UI** — Easy on the eyes for late-night show hunting
+- 📰 **Swiss Indie Design** — High-contrast editorial aesthetic inspired by archival print design
 
 ## Tech Stack
 
@@ -86,6 +86,25 @@ sonic-signal/
 
 - **[SPEC.md](./SPEC.md)** — Full product specification with architecture, data models, and roadmap
 - **[CLAUDE.md](./CLAUDE.md)** — Development guidelines and Claude Code instructions
+
+## Design System
+
+SonicSignal follows a **Swiss Indie** aesthetic: high-impact typography, clean lines, and a print-inspired editorial layout.
+
+**Core Principles:**
+- Off-white paper background (`#F9F9F7`)
+- Ink black text (`#1A1A1A`)
+- Signal green accents (`#2D5A27`)
+- No rounded corners, no drop shadows
+- Grayscale images that reveal color on hover
+- Monospaced "archival stamps" for curation scores
+
+**Typography:**
+- Headings: Playfair Display (Serif)
+- Body: Inter (Sans-serif)
+- Data: JetBrains Mono (Monospace)
+
+See [SPEC.md Section 4](./SPEC.md#4-design-system-swiss-indie) for full design tokens.
 
 ## The Curation Score
 

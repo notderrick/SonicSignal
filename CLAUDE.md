@@ -61,18 +61,54 @@ async def get_events(
 
 - Use **functional components** with hooks
 - Use **TypeScript** if possible, otherwise PropTypes
-- Use **Tailwind CSS** for styling (dark mode first)
+- Use **Tailwind CSS** for styling following the **Swiss Indie** design system
 - Component files: PascalCase (`EventCard.jsx`)
 - Hook files: camelCase with `use` prefix (`useEvents.js`)
 
+**Design System: Swiss Indie**
+- Color palette: Off-white paper (`#F9F9F7`), Ink black (`#1A1A1A`), Signal green (`#2D5A27`)
+- Typography: Playfair Display (headings), Inter (body), JetBrains Mono (data/scores)
+- **No rounded corners** - Use sharp edges for editorial aesthetic
+- **No drop shadows** - Flat, print-inspired hierarchy
+- Grayscale images by default, color on hover
+
 ```jsx
-// Example component structure
+// Example component structure - Swiss Indie style
 export default function EventCard({ event }) {
   return (
-    <div className="bg-gray-900 rounded-lg p-4">
-      ...
+    <div className="border-b border-ink hover:bg-gray-100 transition-colors">
+      <div className="flex items-center justify-between p-6">
+        <div>
+          <h3 className="font-serif text-2xl text-ink">{event.artist}</h3>
+          <p className="font-sans text-sm text-ink/70">{event.venue}</p>
+        </div>
+        <span className="font-mono text-xs text-signal">
+          SCORE: {event.curation_score.toFixed(2)}
+        </span>
+      </div>
     </div>
   );
+}
+```
+
+**Tailwind Config:**
+```javascript
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        paper: '#F9F9F7',
+        ink: '#1A1A1A',
+        signal: '#2D5A27',
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
+      },
+    },
+  },
 }
 ```
 
