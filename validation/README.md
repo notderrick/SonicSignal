@@ -2,82 +2,94 @@
 
 This directory contains scripts to validate the SonicSignal data pipeline approach before building production infrastructure.
 
-## Setup
+## Quick Start (No API Keys Required!)
 
 1. **Create virtual environment:**
    ```bash
-   cd validation
-   python3 -m venv ../venv
-   source ../venv/bin/activate
+   cd /Users/derrickhoward/Development/sonicsignal
+   source venv/bin/activate
    ```
 
 2. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt
+   pip install -r validation/requirements.txt
    ```
 
-3. **Configure API keys:**
+3. **Run exploration (works immediately!):**
    ```bash
-   cp ../.env.example ../.env
-   # Edit .env and add your API keys
+   python validation/explore_apis_bandsintown.py
    ```
 
-## API Key Registration
+That's it! No API key registration needed to get started.
 
-You'll need to register for the following APIs:
+## Why Bandsintown?
 
-### Ticketmaster Discovery API
-1. Go to https://developer.ticketmaster.com/
-2. Create an account
-3. Request an API key
-4. Add to `.env`: `TICKETMASTER_API_KEY=your_key_here`
+For Phase 0 validation, we're using **Bandsintown** instead of Ticketmaster/SeatGeek/Songkick because:
 
-### SeatGeek Platform API
-1. Go to https://platform.seatgeek.com/
-2. Sign up for a developer account
-3. Get your Client ID and Client Secret
-4. Add to `.env`:
-   - `SEATGEEK_CLIENT_ID=your_client_id`
-   - `SEATGEEK_CLIENT_SECRET=your_client_secret`
+✅ **No API key signup required** - Just provide an app identifier
+✅ **Comprehensive NYC coverage** - Includes indie venues and smaller acts
+✅ **Good data quality** - Artist names, venues, dates, ticket links
+✅ **Easy to use** - Simple REST API, no OAuth
 
-### Songkick API
-1. Go to https://www.songkick.com/developer
-2. Request an API key
-3. Add to `.env`: `SONGKICK_API_KEY=your_key_here`
+Later in production (Phase 1+), we can add additional sources if needed.
 
-### Spotify Web API
+## Configuration
+
+### Required (for Bandsintown)
+
+Edit `.env` and set:
+```bash
+BANDSINTOWN_APP_ID=sonicsignal  # Can be any identifier
+```
+
+Or just use the default - it works without configuration!
+
+### Optional (for Spotify matching)
+
+Only needed when running `test_spotify.py`:
+
 1. Go to https://developer.spotify.com/dashboard
 2. Create a new app
 3. Get your Client ID and Client Secret
 4. Add to `.env`:
-   - `SPOTIFY_CLIENT_ID=your_client_id`
-   - `SPOTIFY_CLIENT_SECRET=your_client_secret`
+   ```bash
+   SPOTIFY_CLIENT_ID=your_client_id
+   SPOTIFY_CLIENT_SECRET=your_client_secret
+   ```
 
 ## Scripts
 
-### 1. `explore_apis.py` - API Exploration
-Fetches 1 week of NYC events from all 3 sources and exports to JSON.
+### 1. `explore_apis_bandsintown.py` - API Exploration ⭐ START HERE
+
+Fetches 1 week of NYC events from Bandsintown and exports to JSON.
 
 **Usage:**
 ```bash
-python explore_apis.py
+python validation/explore_apis_bandsintown.py
 ```
 
 **Output:**
-- `sample_data/raw_events.json` - Raw API responses
-- Console summary with event counts and overlap analysis
+- `sample_data/raw_events.json` - Raw API responses with metadata
+- Console summary with event counts, venue/artist lists, capacity analysis
+
+**What it does:**
+1. Searches Bandsintown for NYC events in next 7 days
+2. If few results, also searches popular NYC artists
+3. Exports all data to JSON
+4. Provides quick stats on venues, artists, capacity data
 
 **Success Criteria:**
-- Fetch >100 events from each source
-- No rate limit errors
-- Data structure is consistent
+- Fetch >50 events from Bandsintown
+- Events have artist, venue, date, ticket URL
+- Some events include venue capacity
 
-### 2. `test_dedup.py` - Deduplication Testing
-Tests fuzzy matching logic to identify duplicate events across sources.
+### 2. `test_dedup.py` - Deduplication Testing (TODO)
+
+Tests fuzzy matching logic to identify duplicate events.
 
 **Usage:**
 ```bash
-python test_dedup.py
+python validation/test_dedup.py
 ```
 
 **Output:**
@@ -88,12 +100,15 @@ python test_dedup.py
 - >90% accuracy on manual review
 - <5% false positives
 
-### 3. `test_spotify.py` - Spotify Match Rate
+### 3. `test_spotify.py` - Spotify Match Rate (TODO)
+
 Tests how many artists from sample data can be matched to Spotify profiles.
+
+**Requires Spotify API keys** (see Configuration above)
 
 **Usage:**
 ```bash
-python test_spotify.py
+python validation/test_spotify.py
 ```
 
 **Output:**
@@ -106,30 +121,41 @@ python test_spotify.py
 
 ## Validation Checklist
 
-- [ ] Register for all 4 API accounts
-- [ ] Configure `.env` with all keys
-- [ ] Run `explore_apis.py` - fetches >100 events per source
-- [ ] Run `test_dedup.py` - deduplication >90% accurate
-- [ ] Run `test_spotify.py` - match rate >70%
-- [ ] Manual review of sample_data outputs
+- [ ] Run `explore_apis_bandsintown.py` - fetches >50 events
+- [ ] Review `sample_data/raw_events.json` - check data quality
+- [ ] Build and run `test_dedup.py` - deduplication >90% accurate
+- [ ] Get Spotify API keys (optional for now)
+- [ ] Build and run `test_spotify.py` - match rate >70%
 - [ ] Create `VALIDATION_REPORT.md` with findings
 - [ ] Decision: Proceed to Phase 1 or adjust strategy
 
 ## Troubleshooting
 
-**API Rate Limits:**
-- Ticketmaster: 5 requests/second, 5000/day
-- SeatGeek: 1000 requests/day (free tier)
-- Songkick: Contact support for limits
-- Spotify: 100 requests/30 seconds
+**No events found:**
+- Bandsintown may have limited data for certain dates
+- Try running on a different day of the week
+- The script will automatically try artist-based search as fallback
 
-If you hit rate limits, add delays between requests or reduce fetch window.
+**Rate limiting:**
+- Bandsintown is generally permissive
+- Script includes 200ms delays between artist requests
+- If you hit limits, reduce the sample artist list
 
-**No Events Found:**
-- Check date range (should be next 7 days)
-- Verify city/state filters are correct
-- Some sources may have fewer NYC events during certain weeks
-
-**Import Errors:**
-- Make sure virtual environment is activated
+**Import errors:**
+- Make sure virtual environment is activated: `source venv/bin/activate`
 - Run `pip install -r requirements.txt` again
+
+## Legacy Scripts
+
+**`explore_apis.py`** - Original script using Ticketmaster/SeatGeek/Songkick.
+Kept for reference but requires API key registration. Use `explore_apis_bandsintown.py` instead for Phase 0.
+
+## Production Notes
+
+For Phase 1 (production deployment), we may want to:
+- Add Ticketmaster for major venue coverage
+- Add SeatGeek for capacity data
+- Add Songkick for DIY/small venue coverage
+- Use Bandsintown as the base layer
+
+But for validation, Bandsintown alone is sufficient to prove the concept.
