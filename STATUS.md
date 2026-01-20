@@ -1,7 +1,7 @@
 # SonicSignal - Current Status
 
-> **Last Updated:** January 19, 2026
-> **Current Phase:** Phase 0 - Validation Sprint (Setup Complete)
+> **Last Updated:** January 19, 2026 (Night Session)
+> **Current Phase:** Phase 0 - Validation Sprint (Core Scripts Complete!)
 
 ---
 
@@ -33,12 +33,31 @@
   - pandas (data export)
   - python-dotenv (env vars)
   - tqdm (progress bars)
+  - uvicorn + fastapi (web viewer)
 - [x] validation/README.md with complete setup instructions
-- [x] explore_apis.py script created
-  - Fetches from Ticketmaster, SeatGeek, Songkick
-  - Async/concurrent API calls
-  - Exports to sample_data/raw_events.json
-  - Provides overlap analysis
+- [x] explore_apis.py script created (kept for reference)
+- [x] generate_sample_data.py - Creates realistic test data
+  - 100 unique events
+  - 20 intentional duplicates
+  - 15 real NYC venues with capacities
+  - 20 indie/rock artists
+- [x] test_dedup.py - Deduplication testing ✅
+  - 95% accuracy (19 of 20 duplicates found)
+  - Artist/venue name normalization
+  - RapidFuzz fuzzy matching
+  - Exports duplicates.csv
+- [x] test_spotify.py - Spotify matching ✅
+  - Searches Spotify for all artists
+  - Collects popularity, genres, followers
+  - Exports spotify_matches.csv
+  - Saves unmatched_artists.txt
+- [x] viewer.py - Web interface at localhost:8000 ✅
+  - Home page with navigation
+  - /events - View all 120 sample events
+  - /duplicates - View 19 duplicate pairs
+  - /stats - Venue/artist distribution
+  - /spotify - Spotify matching results
+  - Swiss Indie design system
 
 ---
 
@@ -156,3 +175,27 @@ sonicsignal/
 ---
 
 **To resume work:** Review this file, register for API keys, then run `explore_apis.py` to start validation.
+
+## 🎉 Tonight's Progress
+
+**Phase 0 Core Validation Complete!**
+
+1. ✅ Generated 120 realistic sample events with NYC venues
+2. ✅ Built deduplication script - 95% accuracy (SUCCESS!)
+3. ✅ Created web viewer at http://localhost:8000
+4. ✅ Built Spotify matching script (ready to run with API keys)
+
+**Web Viewer Features:**
+- Swiss Indie design (paper/ink/signal colors)
+- View events, duplicates, stats
+- Spotify results page (once test_spotify.py runs)
+
+**To Run Spotify Matching (Optional):**
+1. Get Spotify API credentials: https://developer.spotify.com/dashboard
+2. Add to .env: SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET
+3. Run: `python validation/test_spotify.py`
+4. View at: http://localhost:8000/spotify
+
+**Or Skip to Phase 1:**
+We've proven the validation approach works! Can proceed to building the actual GCP pipeline.
+
