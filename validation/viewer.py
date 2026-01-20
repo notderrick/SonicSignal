@@ -91,6 +91,11 @@ async def home():
                     <span class="badge">ANALYSIS</span>
                     <p>Venue distribution, capacity analysis, and artist breakdown</p>
                 </a>
+                <a href="/spotify" class="card">
+                    <h2>Spotify Matches</h2>
+                    <span class="badge">POPULARITY DATA</span>
+                    <p>Artist matching results with popularity scores and genres</p>
+                </a>
             </div>
         </div>
     </body>
@@ -424,6 +429,149 @@ async def stats():
                     </table>
                 </div>
             </div>
+        </div>
+    </body>
+    </html>
+    """
+
+
+@app.get("/spotify", response_class=HTMLResponse)
+async def spotify():
+    """View Spotify matching results."""
+    # Check if results exist
+    import os
+    if not os.path.exists("sample_data/spotify_matches.csv"):
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head><title>Spotify Matches - SonicSignal</title>
+        <style>
+            body { font-family: 'Inter', sans-serif; background: #F9F9F7; color: #1A1A1A; padding: 40px; }
+            .container { max-width: 800px; margin: 0 auto; }
+            h1 { font-family: 'Playfair Display', serif; font-size: 2.5em; margin-bottom: 20px; }
+            .back { text-decoration: none; color: #2D5A27; margin-bottom: 20px; display: inline-block; }
+            .message { background: white; border: 1px solid #1A1A1A; padding: 30px; margin-top: 20px; }
+            code { background: #1A1A1A; color: white; padding: 2px 8px; font-family: 'JetBrains Mono', monospace; }
+        </style>
+        </head>
+        <body>
+            <div class="container">
+                <a href="/" class="back">← Back</a>
+                <h1>Spotify Matches</h1>
+                <div class="message">
+                    <p>No Spotify results yet. Run the matching script first:</p>
+                    <p style="margin-top: 20px;"><code>python validation/test_spotify.py</code></p>
+                    <p style="margin-top: 20px;">You'll need Spotify API credentials (client ID and secret).</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+    # Load results
+    import pandas as pd
+    df = pd.read_csv("sample_data/spotify_matches.csv")
+
+    matched_df = df[df["matched"] == True]
+    unmatched_df = df[df["matched"] == False]
+
+    match_rate = (len(matched_df) / len(df)) * 100
+
+    # Build HTML table
+    rows = ""
+    for i, row in matched_df.head(30).iterrows():
+        popularity_class = "high" if row['popularity'] >= 70 else "medium" if row['popularity'] >= 30 else "low"
+        genres_short = row['genres'][:50] + "..." if len(str(row['genres'])) > 50 else row['genres']
+
+        rows += f"""
+        <tr>
+            <td class="artist">{row['original_name']}</td>
+            <td>{row['spotify_name']}</td>
+            <td class="pop {popularity_class}">{row['popularity']}</td>
+            <td class="genres">{genres_short}</td>
+            <td class="followers">{int(row['followers']):,}</td>
+        </tr>
+        """
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Spotify Matches - SonicSignal</title>
+        <style>
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            body {{
+                font-family: 'Inter', -apple-system, sans-serif;
+                background: #F9F9F7;
+                color: #1A1A1A;
+                padding: 40px;
+            }}
+            .container {{ max-width: 1400px; margin: 0 auto; }}
+            h1 {{
+                font-family: 'Playfair Display', serif;
+                font-size: 2.5em;
+                margin-bottom: 20px;
+            }}
+            .back {{ text-decoration: none; color: #2D5A27; margin-bottom: 20px; display: inline-block; }}
+            .stats {{
+                background: #2D5A27;
+                color: white;
+                padding: 20px;
+                margin: 20px 0;
+                font-family: 'JetBrains Mono', monospace;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                background: white;
+            }}
+            th, td {{
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }}
+            th {{
+                background: #1A1A1A;
+                color: white;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.9em;
+            }}
+            .artist {{ font-weight: 600; }}
+            .pop {{ font-family: 'JetBrains Mono', monospace; font-weight: bold; }}
+            .pop.high {{ color: #2D5A27; }}
+            .pop.medium {{ color: #f0ad4e; }}
+            .pop.low {{ color: #999; }}
+            .genres {{ font-size: 0.9em; color: #666; }}
+            .followers {{ font-family: 'JetBrains Mono', monospace; }}
+            tr:hover {{ background: #f5f5f5; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <a href="/" class="back">← Back</a>
+            <h1>Spotify Artist Matches</h1>
+            <div class="stats">
+                <div>MATCH RATE: {match_rate:.1f}% ({len(matched_df)} of {len(df)})</div>
+                <div>MATCHED: {len(matched_df)}</div>
+                <div>UNMATCHED: {len(unmatched_df)}</div>
+                <div>AVG POPULARITY: {matched_df['popularity'].mean():.1f}</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Original Name</th>
+                        <th>Spotify Name</th>
+                        <th>Popularity</th>
+                        <th>Genres</th>
+                        <th>Followers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows}
+                </tbody>
+            </table>
+            <p style="margin-top: 20px; font-size: 0.9em; color: #666;">Showing first 30 matched artists</p>
         </div>
     </body>
     </html>
