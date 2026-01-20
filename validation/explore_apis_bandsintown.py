@@ -30,19 +30,17 @@ async def fetch_bandsintown_events() -> list[dict[str, Any]]:
     """Fetch events from Bandsintown API by location."""
     print("\n🎸 Fetching from Bandsintown...")
 
-    # Bandsintown API endpoint for location-based events
-    # Note: Bandsintown requires city, state format
-    url = f"https://rest.bandsintown.com/events/search"
+    # Bandsintown API endpoint (using newer format)
+    url = "https://rest.bandsintown.com/events"
 
     # Date range: next 7 days
-    start_date = datetime.now().strftime("%Y-%m-%d")
-    end_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+    start_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    end_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S")
 
     params = {
         "app_id": BANDSINTOWN_APP_ID,
         "location": NYC_LOCATION,
         "date": f"{start_date},{end_date}",
-        "per_page": 100,  # Max results per page
     }
 
     events = []
