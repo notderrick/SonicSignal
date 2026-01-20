@@ -20,3 +20,7 @@ python-dateutil>=2.8.2
 
 # Progress bars for long-running operations
 tqdm>=4.66.0
+
+# Web server for validation viewer
+uvicorn>=0.34.0
+fastapi>=0.115.0
